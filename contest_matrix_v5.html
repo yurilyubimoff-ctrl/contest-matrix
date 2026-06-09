@@ -1239,7 +1239,7 @@ ${params}
         "anthropic-dangerous-direct-browser-access": "true"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-opus-4-6",
         max_tokens: 1000,
         messages: [{ role: "user", content: prompt }]
       })
@@ -1392,6 +1392,7 @@ const EVENT_ICONS = { wedding:'💍', corporate:'🏢', birthday:'🎂', content
 
 function renderVault() {
   const wrap = document.getElementById('vault');
+  if (!wrap) return;
   if (!vault.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
 
