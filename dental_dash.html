@@ -45,7 +45,7 @@
     <p>Втеча з кабінету стоматолога.<br>Ухиляйся від зубів і шприців,<br>перестрибуй інструменти.</p>
     <button id="btn-pc" class="big-btn">🖥️ Це екран (комп)</button>
     <button id="btn-phone" class="big-btn">📱 Це пульт (телефон)</button>
-    <p style="opacity:0.35;font-size:9px;margin-top:14px;">build v15</p>
+    <p style="opacity:0.35;font-size:9px;margin-top:14px;">build v16</p>
   </div>
 
   <div id="pc-setup-screen" class="screen" style="display:none">
@@ -514,9 +514,12 @@ function update(){
     player.x = Math.max(6, Math.min(LEVEL_LENGTH-6, player.x));
   }
 
-  player.ducking = !!(remote.duck && player.grounded);
+  player.ducking = !!remote.duck;
   const duckTarget = player.ducking ? 1 : 0;
   player.duckAnim = (player.duckAnim||0) + (duckTarget - (player.duckAnim||0)) * 0.35;
+
+  const curH = player.ducking ? DUCK_H : STAND_H;
+  if(player.grounded){ player.y = GROUND_Y - curH; }
 
   if(remote.jumpSeq > lastJumpSeq){
     lastJumpSeq = remote.jumpSeq;
@@ -525,7 +528,6 @@ function update(){
 
   player.vy += GRAVITY;
   player.y += player.vy;
-  const curH = player.ducking ? DUCK_H : STAND_H;
   if(player.y + curH >= GROUND_Y){ player.y = GROUND_Y - curH; player.vy = 0; player.grounded = true; }
   else { player.grounded = false; }
 
