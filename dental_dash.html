@@ -45,6 +45,7 @@
     <p>Побег из кабинета стоматолога.<br>Уворачивайся от зубов и шприцов,<br>перепрыгивай инструменты.</p>
     <button id="btn-pc" class="big-btn">🖥️ Это экран (комп)</button>
     <button id="btn-phone" class="big-btn">📱 Это пульт (телефон)</button>
+    <p style="opacity:0.35;font-size:9px;margin-top:14px;">build v9</p>
   </div>
 
   <div id="pc-setup-screen" class="screen" style="display:none">
@@ -67,6 +68,7 @@
   <div id="phone-controller-screen" class="screen" style="display:none">
     <div id="phone-score">Очки: 0 &nbsp; ❤️❤️❤️❤️❤️</div>
     <div id="phone-link-status" style="font-size:11px;color:#ff9f9f;">Отправка...</div>
+    <button id="btn-god" style="align-self:center;margin:4px;padding:6px 14px;border-radius:20px;background:#3a2a00;color:#ffe27a;border:2px solid #ffe27a;font-size:11px;font-weight:bold;">👑 РЕЖИМ БОГА: ВЫКЛ</button>
     <div id="pad">
       <div class="dpad">
         <button id="btn-left" class="ctrl-btn">◀</button>
@@ -83,6 +85,7 @@
     <div id="hud">
       <span id="hud-score">Очки: 0</span>
       <span id="hud-lives">❤️❤️❤️❤️❤️</span>
+      <span id="hud-god" style="display:none;color:#ffe27a;">👑 БОГ</span>
       <span id="hud-signal">📱 нет сигнала</span>
       <span id="hud-code">Код: ----</span>
       <span id="btn-fullscreen" style="cursor:pointer;font-size:16px;">⛶</span>
@@ -155,7 +158,7 @@ document.getElementById('btn-pc').addEventListener('click', () => {
       conn.on('data', (data) => {
         remote = data;
         lastSignalAt = Date.now();
-        if(!gameStarted && (data.left || data.right || data.duck || data.jumpSeq > 0)){
+        if(!gameStarted && (data.left || data.right || data.duck || data.jumpSeq > 0 || data.god)){
           startTheGame();
         }
       });
@@ -231,7 +234,7 @@ document.getElementById('btn-connect').addEventListener('click', () => {
 });
 
 /* ---------- PHONE CONTROLS ---------- */
-let controlState = { left:false, right:false, duck:false, jumpSeq:0 };
+let controlState = { left:false, right:false, duck:false, jumpSeq:0, god:false };
 function writeState(){
   const el = document.getElementById('phone-link-status');
   if(activeConn && activeConn.open){
@@ -260,6 +263,17 @@ function initPhoneControls(){
   const doJump = (e) => { e.preventDefault(); controlState.jumpSeq++; writeState(); jbtn.classList.add('active'); setTimeout(()=>jbtn.classList.remove('active'),120); };
   jbtn.addEventListener('touchstart', doJump, {passive:false});
   jbtn.addEventListener('mousedown', doJump);
+  const godBtn = document.getElementById('btn-god');
+  const toggleGod = (e) => {
+    e.preventDefault();
+    controlState.god = !controlState.god;
+    writeState();
+    godBtn.textContent = controlState.god ? '👑 РЕЖИМ БОГА: ВКЛ' : '👑 РЕЖИМ БОГА: ВЫКЛ';
+    godBtn.style.background = controlState.god ? '#ffe27a' : '#3a2a00';
+    godBtn.style.color = controlState.god ? '#3a2a00' : '#ffe27a';
+  };
+  godBtn.addEventListener('touchstart', toggleGod, {passive:false});
+  godBtn.addEventListener('mousedown', toggleGod);
 }
 
 /* ---------- PC GAME ---------- */
@@ -337,14 +351,17 @@ function flyingBaseY(o){
 }
 function genLevel(){
   const arr=[];
-  let x=420, i=0;
+  let x=380, i=0;
   while(x < LEVEL_LENGTH-380){
     const progress = x / LEVEL_LENGTH;
-    const flyProb = Math.min(0.55, Math.max(0, (progress-0.06) * 0.9));
+    const flyProb = Math.min(0.55, 0.16 + progress*0.65);
     const type = Math.random() < flyProb ? 'flying' : 'ground';
     const tier = type==='flying' ? (Math.random()<0.5 ? 'duck' : 'jump') : null;
-    arr.push({type, tier, x, w:14, h:14, passed:false, hit:false, bob:Math.random()*Math.PI*2, dy:0});
-    x += 230 + Math.random()*140;
+    const kind = type==='ground'
+      ? (Math.random()<0.5 ? 'drill' : 'denture')
+      : (Math.random()<0.5 ? 'tooth' : 'denture');
+    arr.push({type, tier, kind, x, w:14, h:14, passed:false, hit:false, bob:Math.random()*Math.PI*2, dy:0});
+    x += 160 + Math.random()*110;
     i++;
   }
   return arr;
@@ -353,7 +370,7 @@ function genLevel(){
 function initGame(){
   canvas = document.getElementById('game-canvas');
   ctx = canvas.getContext('2d');
-  remote = { left:false, right:false, duck:false, jumpSeq:0 };
+  remote = { left:false, right:false, duck:false, jumpSeq:0, god:false };
   lastJumpSeq = 0;
   setInterval(updateSignalIndicator, 500);
   setInterval(pushStatus, 1000);
@@ -421,8 +438,10 @@ function updateHug(){
 function update(){
   if(gameState==='hugging'){ updateHug(); return; }
   if(gameState!=='playing') return;
-  if(remote.left){ player.x -= MOVE_SPEED; player.facing=-1; }
-  if(remote.right){ player.x += MOVE_SPEED; player.facing=1; }
+  const godOn = !!remote.god;
+  const curSpeed = MOVE_SPEED * (godOn ? 2.6 : 1);
+  if(remote.left){ player.x -= curSpeed; player.facing=-1; }
+  if(remote.right){ player.x += curSpeed; player.facing=1; }
   player.x = Math.max(6, Math.min(LEVEL_LENGTH-6, player.x));
 
   player.ducking = !!(remote.duck && player.grounded);
@@ -455,10 +474,12 @@ function update(){
       const overlapY = py2 > oy1 && py1 < oy2;
       if(overlapX && overlapY && !o.hit && player.invTimer<=0){
         o.hit = true;
-        lives--;
-        player.invTimer = 60;
-        sndHit();
-        if(lives <= 0) gameState='over';
+        if(!godOn){
+          lives--;
+          player.invTimer = 60;
+          sndHit();
+          if(lives <= 0) gameState='over';
+        }
       }
       if(!o.passed && player.x > o.x + o.w){
         o.passed = true;
@@ -490,10 +511,12 @@ function update(){
       const overlapY = py2 > oy1 && py1 < oy2;
       if(overlapX && overlapY && !p.hit && player.invTimer<=0){
         p.hit = true;
-        lives--;
-        player.invTimer = 60;
-        sndHit();
-        if(lives <= 0) gameState='over';
+        if(!godOn){
+          lives--;
+          player.invTimer = 60;
+          sndHit();
+          if(lives <= 0) gameState='over';
+        }
       }
       if(!p.passed && p.x < player.x - 10){
         p.passed = true;
@@ -533,6 +556,7 @@ function update(){
 
   document.getElementById('hud-score').textContent = 'Очки: '+score;
   document.getElementById('hud-lives').textContent = '❤️'.repeat(Math.max(0,lives));
+  document.getElementById('hud-god').style.display = godOn ? 'inline' : 'none';
 
   if(gameState==='over') showOverlay();
 }
@@ -556,6 +580,25 @@ function drawTooth(sx,y,o){
   ctx.lineTo(5,4); ctx.lineTo(2,8); ctx.lineTo(0,4); ctx.lineTo(-2,8); ctx.lineTo(-5,4);
   ctx.closePath(); ctx.fill();
   ctx.strokeStyle='#ccc'; ctx.lineWidth=0.5; ctx.stroke();
+  ctx.restore();
+}
+function drawDenture(sx,y,o){
+  ctx.save();
+  ctx.translate(sx+o.w/2, y+o.h/2);
+  ctx.rotate(Math.sin(Date.now()/260+o.bob)*0.3);
+  ctx.fillStyle = '#e9a6a0';
+  ctx.beginPath();
+  ctx.moveTo(-8,-2);
+  ctx.quadraticCurveTo(0,6,8,-2);
+  ctx.quadraticCurveTo(8,3,0,7);
+  ctx.quadraticCurveTo(-8,3,-8,-2);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  for(let i=-3;i<=3;i++){
+    ctx.fillRect(i*2-0.8, -2, 1.6, 4.5);
+  }
+  ctx.strokeStyle='#c97b73'; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.moveTo(-8,-2); ctx.quadraticCurveTo(0,6,8,-2); ctx.stroke();
   ctx.restore();
 }
 function drawPlayer(){
@@ -749,8 +792,13 @@ function render(){
   obstacles.forEach(o => {
     const sx = o.x - camX - o.w/2;
     if(sx < -20 || sx > GW+20) return;
-    if(o.type==='ground'){ drawDrill(sx, GROUND_Y-o.h, o); }
-    else { drawTooth(sx, flyingBaseY(o)+o.dy, o); }
+    if(o.type==='ground'){
+      if(o.kind==='denture'){ drawDenture(sx, GROUND_Y-o.h, o); }
+      else { drawDrill(sx, GROUND_Y-o.h, o); }
+    } else {
+      if(o.kind==='denture'){ drawDenture(sx, flyingBaseY(o)+o.dy, o); }
+      else { drawTooth(sx, flyingBaseY(o)+o.dy, o); }
+    }
   });
 
   bossProjectiles.forEach(p => {
