@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Dental Dash — Уровень 1</title>
+<title>Dental Dash — Рівень 1</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
   html, body { margin:0; padding:0; height:100%; background:#12181c; font-family: 'Courier New', monospace; overflow:hidden; }
@@ -42,51 +42,51 @@
 
   <div id="menu-screen" class="screen">
     <h1>🦷 DENTAL DASH</h1>
-    <p>Побег из кабинета стоматолога.<br>Уворачивайся от зубов и шприцов,<br>перепрыгивай инструменты.</p>
-    <button id="btn-pc" class="big-btn">🖥️ Это экран (комп)</button>
-    <button id="btn-phone" class="big-btn">📱 Это пульт (телефон)</button>
+    <p>Втеча з кабінету стоматолога.<br>Ухиляйся від зубів і шприців,<br>перестрибуй інструменти.</p>
+    <button id="btn-pc" class="big-btn">🖥️ Це екран (комп)</button>
+    <button id="btn-phone" class="big-btn">📱 Це пульт (телефон)</button>
     <p style="opacity:0.35;font-size:9px;margin-top:14px;">build v9</p>
   </div>
 
   <div id="pc-setup-screen" class="screen" style="display:none">
     <h1 id="splash-title">🦷 DENTAL DASH</h1>
-    <p style="opacity:0.7;font-size:12px;">Уровень 1: Побег из клиники</p>
-    <h2>Код для подключения телефона</h2>
+    <p style="opacity:0.7;font-size:12px;">Рівень 1: Втеча з клініки</p>
+    <h2>Код для підключення телефона</h2>
     <div id="room-code-display" class="room-code">0000</div>
-    <p>Открой эту же ссылку на телефоне,<br>выбери «Пульт» и введи этот код.</p>
-    <p id="splash-hint" style="color:#ffe27a;font-size:13px;">📱 Нажми любую кнопку на пульте — игра начнётся сама</p>
-    <button id="btn-start-game" class="big-btn">Начать игру ▶</button>
+    <p>Відкрий це саме посилання на телефоні,<br>вибери «Пульт» і введи цей код.</p>
+    <p id="splash-hint" style="color:#ffe27a;font-size:13px;">📱 Натисни будь-яку кнопку на пульті — гра почнеться сама</p>
+    <button id="btn-start-game" class="big-btn">Почати гру ▶</button>
   </div>
 
   <div id="phone-setup-screen" class="screen" style="display:none">
-    <h2>Введи код с экрана компа</h2>
+    <h2>Введи код з екрана компа</h2>
     <input id="code-input" type="text" maxlength="6" autocapitalize="none" autocomplete="off" placeholder="xxxxxx">
-    <button id="btn-connect" class="big-btn">Подключиться</button>
+    <button id="btn-connect" class="big-btn">Підключитися</button>
     <p id="phone-status"></p>
   </div>
 
   <div id="phone-controller-screen" class="screen" style="display:none">
-    <div id="phone-score">Очки: 0 &nbsp; ❤️❤️❤️❤️❤️</div>
-    <div id="phone-link-status" style="font-size:11px;color:#ff9f9f;">Отправка...</div>
-    <button id="btn-god" style="align-self:center;margin:4px;padding:6px 14px;border-radius:20px;background:#3a2a00;color:#ffe27a;border:2px solid #ffe27a;font-size:11px;font-weight:bold;">👑 РЕЖИМ БОГА: ВЫКЛ</button>
+    <div id="phone-score">Рахунок: 0 &nbsp; ❤️❤️❤️❤️❤️</div>
+    <div id="phone-link-status" style="font-size:11px;color:#ff9f9f;">Надсилання...</div>
+    <button id="btn-god" style="align-self:center;margin:4px;padding:6px 14px;border-radius:20px;background:#3a2a00;color:#ffe27a;border:2px solid #ffe27a;font-size:11px;font-weight:bold;">👑 РЕЖИМ БОГА: ВИМК</button>
     <div id="pad">
       <div class="dpad">
         <button id="btn-left" class="ctrl-btn">◀</button>
         <button id="btn-right" class="ctrl-btn">▶</button>
       </div>
       <div class="actions">
-        <button id="btn-duck" class="ctrl-btn action">⬇<br>УВОРОТ</button>
-        <button id="btn-jump" class="ctrl-btn action">⤒<br>ПРЫЖОК</button>
+        <button id="btn-duck" class="ctrl-btn action">⬇<br>УХИЛ</button>
+        <button id="btn-jump" class="ctrl-btn action">⤒<br>СТРИБОК</button>
       </div>
     </div>
   </div>
 
   <div id="game-screen" class="screen" style="display:none; padding:0;">
     <div id="hud">
-      <span id="hud-score">Очки: 0</span>
+      <span id="hud-score">Рахунок: 0</span>
       <span id="hud-lives">❤️❤️❤️❤️❤️</span>
       <span id="hud-god" style="display:none;color:#ffe27a;">👑 БОГ</span>
-      <span id="hud-signal">📱 нет сигнала</span>
+      <span id="hud-signal">📱 немає сигналу</span>
       <span id="hud-code">Код: ----</span>
       <span id="btn-fullscreen" style="cursor:pointer;font-size:16px;">⛶</span>
     </div>
@@ -94,7 +94,7 @@
     <div id="game-overlay">
       <h2 id="overlay-title"></h2>
       <p id="overlay-score"></p>
-      <button id="btn-restart" class="big-btn">Заново</button>
+      <button id="btn-restart" class="big-btn">Спочатку</button>
     </div>
   </div>
 
@@ -141,14 +141,23 @@ document.getElementById('btn-pc').addEventListener('click', () => {
 
   if(typeof Peer === 'undefined'){
     disp.textContent = 'ошибка';
-    statusP.textContent = 'Не удалось загрузить библиотеку связи. Проверь интернет и перезагрузи страницу.';
+    statusP.textContent = 'Не вдалося завантажити бібліотеку зв\'язку. Перевір інтернет і перезавантаж сторінку.';
     return;
   }
 
   let pcAttempts = 0;
   function tryCreate(){
     roomCode = randCode();
-    peer = new Peer(roomCode);
+    peer = new Peer(roomCode, {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+          { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+          { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+        ]
+      }
+    });
     peer.on('open', () => {
       disp.textContent = roomCode.replace('dentaldash-','');
       document.getElementById('btn-start-game').disabled = false;
@@ -171,12 +180,12 @@ document.getElementById('btn-pc').addEventListener('click', () => {
       } else if((err.type === 'server-error' || err.type === 'network' || err.type === 'socket-error' || err.type === 'socket-closed') && pcAttempts < 3){
         pcAttempts++;
         disp.textContent = '...';
-        statusP.textContent = 'Переподключение (попытка '+(pcAttempts+1)+' из 4)...';
+        statusP.textContent = 'Перепідключення (спроба '+(pcAttempts+1)+' з 4)...';
         try{ peer.destroy(); }catch(e){}
         setTimeout(tryCreate, 900);
       } else {
         disp.textContent = 'ошибка';
-        statusP.textContent = 'Не удалось создать код связи (' + err.type + '). Проверь интернет и перезагрузи страницу.';
+        statusP.textContent = 'Не вдалося створити код зв\'язку (' + err.type + '). Перевір інтернет і перезавантаж сторінку.';
       }
     });
   }
@@ -192,41 +201,69 @@ document.getElementById('btn-connect').addEventListener('click', () => {
   const code = document.getElementById('code-input').value.trim().toLowerCase();
   const statusEl = document.getElementById('phone-status');
   if(code.length===0){
-    statusEl.textContent = 'Введи код с экрана компа';
+    statusEl.textContent = 'Введи код з екрана компа';
     return;
   }
   if(typeof Peer === 'undefined'){
-    statusEl.textContent = 'Не удалось загрузить библиотеку связи. Проверь интернет.';
+    statusEl.textContent = 'Не вдалося завантажити бібліотеку зв\'язку. Перевір інтернет.';
     return;
   }
   roomCode = 'dentaldash-' + code;
   statusEl.textContent = 'Подключение...';
   let phoneAttempts = 0;
   function tryConnect(){
-    peer = new Peer();
+    peer = new Peer({
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+          { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+          { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+        ]
+      }
+    });
     peer.on('open', () => {
       activeConn = peer.connect(roomCode, {reliable:true});
+      const connectTimeout = setTimeout(() => {
+        if(!activeConn.open && phoneAttempts < 3){
+          phoneAttempts++;
+          statusEl.textContent = 'Перепідключення (спроба '+(phoneAttempts+1)+' з 4)...';
+          try{ peer.destroy(); }catch(e){}
+          setTimeout(tryConnect, 600);
+        } else if(!activeConn.open){
+          statusEl.textContent = 'Не вдалося з\'єднатися напряму. Спробуй перевести обидва пристрої в одну Wi-Fi мережу.';
+        }
+      }, 7000);
       activeConn.on('open', () => {
+        clearTimeout(connectTimeout);
         showScreen('phone-controller-screen');
         initPhoneControls();
       });
       activeConn.on('data', (data) => {
-        document.getElementById('phone-score').textContent = 'Очки: '+data.score+'   '+'❤️'.repeat(Math.max(0,data.lives));
+        document.getElementById('phone-score').textContent = 'Рахунок: '+data.score+'   '+'❤️'.repeat(Math.max(0,data.lives));
       });
       activeConn.on('error', () => {
-        statusEl.textContent = 'Ошибка соединения. Проверь код и что комп нажал «Начать игру».';
+        clearTimeout(connectTimeout);
+        if(phoneAttempts < 3){
+          phoneAttempts++;
+          statusEl.textContent = 'Перепідключення (спроба '+(phoneAttempts+1)+' з 4)...';
+          try{ peer.destroy(); }catch(e){}
+          setTimeout(tryConnect, 600);
+        } else {
+          statusEl.textContent = 'Помилка з\'єднання. Перевір код і чи комп натиснув «Почати гру».';
+        }
       });
     });
     peer.on('error', (err) => {
       if(err.type === 'peer-unavailable'){
-        statusEl.textContent = 'Комп с таким кодом не найден. Проверь код.';
+        statusEl.textContent = 'Комп з таким кодом не знайдено. Перевір код.';
       } else if((err.type === 'server-error' || err.type === 'network' || err.type === 'socket-error' || err.type === 'socket-closed') && phoneAttempts < 3){
         phoneAttempts++;
-        statusEl.textContent = 'Переподключение (попытка '+(phoneAttempts+1)+' из 4)...';
+        statusEl.textContent = 'Перепідключення (спроба '+(phoneAttempts+1)+' з 4)...';
         try{ peer.destroy(); }catch(e){}
         setTimeout(tryConnect, 900);
       } else {
-        statusEl.textContent = 'Ошибка связи (' + err.type + ').';
+        statusEl.textContent = 'Помилка зв\'язку (' + err.type + ').';
       }
     });
   }
@@ -239,9 +276,9 @@ function writeState(){
   const el = document.getElementById('phone-link-status');
   if(activeConn && activeConn.open){
     activeConn.send(controlState);
-    if(el){ el.textContent = 'Отправлено ✅ ('+new Date().toLocaleTimeString()+')'; el.style.color='#8fe08f'; }
+    if(el){ el.textContent = 'Надіслано ✅ ('+new Date().toLocaleTimeString()+')'; el.style.color='#8fe08f'; }
   } else {
-    if(el){ el.textContent = 'Не подключено ❌'; el.style.color='#ff9f9f'; }
+    if(el){ el.textContent = 'Не підключено ❌'; el.style.color='#ff9f9f'; }
   }
 }
 function bindHold(btnId, key){
@@ -268,7 +305,7 @@ function initPhoneControls(){
     e.preventDefault();
     controlState.god = !controlState.god;
     writeState();
-    godBtn.textContent = controlState.god ? '👑 РЕЖИМ БОГА: ВКЛ' : '👑 РЕЖИМ БОГА: ВЫКЛ';
+    godBtn.textContent = controlState.god ? '👑 РЕЖИМ БОГА: УВІМК' : '👑 РЕЖИМ БОГА: ВИМК';
     godBtn.style.background = controlState.god ? '#ffe27a' : '#3a2a00';
     godBtn.style.color = controlState.god ? '#3a2a00' : '#ffe27a';
   };
@@ -405,10 +442,10 @@ function updateSignalIndicator(){
   const sigEl = document.getElementById('hud-signal');
   if(!sigEl) return;
   if(lastSignalAt && Date.now()-lastSignalAt < 2500){
-    sigEl.textContent = '📱 связь ✅';
+    sigEl.textContent = '📱 зв\'язок ✅';
     sigEl.style.color = '#8fe08f';
   } else {
-    sigEl.textContent = '📱 нет сигнала';
+    sigEl.textContent = '📱 немає сигналу';
     sigEl.style.color = '#ff9f9f';
   }
 }
@@ -554,7 +591,7 @@ function update(){
 
   camX = Math.max(0, Math.min(LEVEL_LENGTH-GW, player.x - GW/2));
 
-  document.getElementById('hud-score').textContent = 'Очки: '+score;
+  document.getElementById('hud-score').textContent = 'Рахунок: '+score;
   document.getElementById('hud-lives').textContent = '❤️'.repeat(Math.max(0,lives));
   document.getElementById('hud-god').style.display = godOn ? 'inline' : 'none';
 
@@ -856,14 +893,14 @@ function render(){
     ctx.textAlign = 'center';
     ctx.font = 'bold 7px monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('ПРЫГАЙ!', psx, bannerY+22);
+    ctx.fillText('СТРИБАЙ!', psx, bannerY+22);
     ctx.restore();
   }
 
   ctx.font = '6px monospace';
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.textAlign = 'left';
-  ctx.fillText('прогресс уровня', 10, 7);
+  ctx.fillText('прогрес рівня', 10, 7);
   ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(10,10,100,4);
   ctx.fillStyle='#5ac8e8'; ctx.fillRect(10,10, Math.min(100, 100*player.x/LEVEL_LENGTH), 4);
   ctx.restore();
@@ -879,9 +916,9 @@ function showOverlay(){
   let title;
   if(gameState==='win'){ title = '🤝 WIN!'; }
   else if(qteCausedOver){ title = '☠️ GAME OVER'; }
-  else { title = '💥 Игра окончена'; }
+  else { title = '💥 Гру закінчено'; }
   document.getElementById('overlay-title').textContent = title;
-  document.getElementById('overlay-score').textContent = 'Финальный счёт: '+score;
+  document.getElementById('overlay-score').textContent = 'Фінальний рахунок: '+score;
 }
 
 function loop(){
