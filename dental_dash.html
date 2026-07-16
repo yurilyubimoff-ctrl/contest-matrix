@@ -365,6 +365,33 @@ function sndHit(){ beep(160,0.18,'sawtooth',0.16); beep(90,0.22,'sawtooth',0.14,
 function sndWin(){ [523,659,784,1047].forEach((f,i)=>beep(f,0.18,'square',0.13,i*0.14)); }
 function sndOver(){ [400,340,280,220].forEach((f,i)=>beep(f,0.22,'sawtooth',0.14,i*0.16)); }
 
+let bossMusicPlaying = false, bossMusicTimer = null, bossMusicStep = 0;
+function startBossMusic(){
+  if(bossMusicPlaying || !audioCtx) return;
+  bossMusicPlaying = true;
+  bossMusicStep = 0;
+  const bassPattern = [98,98,116.5,98, 87.3,87.3,103.8,110];
+  const stepDur = 0.155;
+  function scheduleStep(){
+    if(!bossMusicPlaying) return;
+    const freq = bassPattern[bossMusicStep % bassPattern.length];
+    beep(freq, stepDur*0.85, 'square', 0.10);
+    if(bossMusicStep % 2 === 0){
+      beep(freq*4, stepDur*0.35, 'square', 0.045, stepDur*0.5);
+    }
+    if(bossMusicStep % 8 === 6){
+      beep(freq*1.5, stepDur*0.7, 'sawtooth', 0.06);
+    }
+    bossMusicStep++;
+    bossMusicTimer = setTimeout(scheduleStep, stepDur*1000);
+  }
+  scheduleStep();
+}
+function stopBossMusic(){
+  bossMusicPlaying = false;
+  if(bossMusicTimer){ clearTimeout(bossMusicTimer); bossMusicTimer = null; }
+}
+
 function flyingBaseY(o){
   return o.tier === 'jump' ? (GROUND_Y - 20) : 90;
 }
@@ -379,7 +406,8 @@ function genLevel(){
     const kind = type==='ground'
       ? (Math.random()<0.5 ? 'drill' : 'denture')
       : (Math.random()<0.5 ? 'tooth' : 'denture');
-    arr.push({type, tier, kind, x, w:14, h:14, passed:false, hit:false, bob:Math.random()*Math.PI*2, dy:0});
+    const dentureVariant = Math.floor(Math.random()*3);
+    arr.push({type, tier, kind, dentureVariant, x, w:14, h:14, passed:false, hit:false, bob:Math.random()*Math.PI*2, dy:0});
     x += 160 + Math.random()*110;
     i++;
   }
@@ -408,6 +436,7 @@ function initGame(){
 }
 
 function resetGame(){
+  stopBossMusic();
   player = { x:20, y:GROUND_Y-STAND_H, w:12, vy:0, grounded:true, ducking:false, duckAnim:0, facing:1, invTimer:0 };
   obstacles = genLevel();
   boss = { x: LEVEL_LENGTH-GW+270, minX: LEVEL_LENGTH-GW+160, active:false, lastThrow:0, throwInterval:1500, hp:0 };
@@ -501,7 +530,7 @@ function update(){
           lives--;
           player.invTimer = 60;
           sndHit();
-          if(lives <= 0) gameState='over';
+          if(lives <= 0){ gameState='over'; stopBossMusic(); }
         }
       }
       if(!o.passed && player.x > o.x + o.w){
@@ -515,6 +544,7 @@ function update(){
     boss.active = true;
     player.x = LEVEL_LENGTH-GW+40;
     boss.lastThrow = Date.now()-1000;
+    startBossMusic();
   }
   if(boss.active && !qte.active && gameState==='playing'){
     if(Date.now() - boss.lastThrow > boss.throwInterval){
@@ -542,7 +572,7 @@ function update(){
           lives--;
           player.invTimer = 60;
           sndHit();
-          if(lives <= 0) gameState='over';
+          if(lives <= 0){ gameState='over'; stopBossMusic(); }
         }
       }
       if(!p.passed && p.x < player.x - 10){
@@ -556,13 +586,14 @@ function update(){
   const bossScreenX = boss.x - camX;
   if(boss.active && !qte.active && gameState==='playing' && bossScreenX <= GW/2 + 10){
     qte.active = true;
-    qte.deadline = Date.now() + 1700;
+    qte.deadline = Date.now() + 3700;
     qte.startJumpSeq = lastJumpSeq;
     bossProjectiles = [];
   }
   if(qte.active){
     if(lastJumpSeq > qte.startJumpSeq){
       qte.active = false;
+      stopBossMusic();
       gameState = 'hugging';
       hug.startTime = Date.now();
       hug.startX = player.x;
@@ -574,6 +605,7 @@ function update(){
       player.duckAnim = 0;
     } else if(Date.now() > qte.deadline){
       qte.active = false;
+      stopBossMusic();
       qteCausedOver = true;
       gameState = 'over';
     }
@@ -590,42 +622,74 @@ function update(){
 function drawDentalChair(sx, groundY){
   ctx.save();
   ctx.translate(sx, groundY);
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.62;
 
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  ctx.beginPath(); ctx.ellipse(0, 1, 16, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(-2, 1, 28, 4.5, 0, 0, Math.PI*2); ctx.fill();
 
-  ctx.fillStyle = '#9fb8c2';
-  ctx.fillRect(-3, -14, 6, 14);
-  ctx.beginPath(); ctx.ellipse(0, -14, 9, 2.5, 0, 0, Math.PI*2); ctx.fill();
-
-  ctx.fillStyle = '#b9cdd6';
+  ctx.fillStyle = '#7f98a3';
   ctx.beginPath();
-  ctx.moveTo(-11,-18);
-  ctx.lineTo(9,-18);
-  ctx.lineTo(9,-13);
-  ctx.lineTo(-11,-13);
+  ctx.moveTo(-9,0); ctx.lineTo(9,0); ctx.lineTo(5,-6); ctx.lineTo(-5,-6);
   ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = '#8fa6b0'; ctx.lineWidth = 0.6; ctx.stroke();
+  ctx.fillStyle = '#9fb8c2';
+  ctx.fillRect(-5,-24,10,18);
+  ctx.beginPath(); ctx.ellipse(0,-24,15,4,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#6f8892'; ctx.lineWidth = 0.7; ctx.stroke();
+
+  ctx.fillStyle = '#c3d9e0';
+  ctx.beginPath();
+  ctx.moveTo(-19,-31); ctx.lineTo(15,-31); ctx.lineTo(15,-22); ctx.lineTo(-19,-22);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#8fa6b0'; ctx.lineWidth = 0.8; ctx.stroke();
+  ctx.strokeStyle = 'rgba(143,166,176,0.5)'; ctx.lineWidth = 0.6;
+  for(let i=-14;i<12;i+=6){ ctx.beginPath(); ctx.moveTo(i,-31); ctx.lineTo(i,-22); ctx.stroke(); }
 
   ctx.save();
-  ctx.translate(9,-18);
-  ctx.rotate(-0.95);
-  ctx.fillStyle = '#b9cdd6';
-  ctx.fillRect(-3.5,-15,7,15);
-  ctx.strokeStyle = '#8fa6b0'; ctx.lineWidth = 0.6; ctx.strokeRect(-3.5,-15,7,15);
-  ctx.fillStyle = '#d8e6ea';
-  ctx.beginPath(); ctx.ellipse(0,-18,4,3,0,0,Math.PI*2); ctx.fill();
+  ctx.translate(14,-31);
+  ctx.rotate(-1.05);
+  ctx.fillStyle = '#c3d9e0';
+  ctx.fillRect(-6,-26,12,26);
+  ctx.strokeStyle = '#8fa6b0'; ctx.lineWidth = 0.8; ctx.strokeRect(-6,-26,12,26);
+  ctx.fillStyle = '#e2eef1';
+  ctx.beginPath(); ctx.ellipse(0,-30,7,5,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#8fa6b0'; ctx.lineWidth = 0.6; ctx.stroke();
   ctx.restore();
 
-  ctx.strokeStyle = '#7f98a3'; ctx.lineWidth = 1;
+  const armX = -22, armTopY = -50;
+  ctx.strokeStyle = '#6f8892'; ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(9,-22);
-  ctx.quadraticCurveTo(20,-26,20,-34);
+  ctx.moveTo(-15,-24);
+  ctx.quadraticCurveTo(-24,-34, armX, armTopY+6);
   ctx.stroke();
-  ctx.fillStyle = '#ffe8a8';
-  ctx.beginPath(); ctx.ellipse(20,-35,4,3,0,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#c9a862'; ctx.lineWidth = 0.6; ctx.stroke();
+  ctx.save();
+  ctx.translate(armX, armTopY);
+  const glow = ctx.createRadialGradient(0,10,2, 0,26,26);
+  glow.addColorStop(0,'rgba(255,244,200,0.55)');
+  glow.addColorStop(1,'rgba(255,244,200,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.moveTo(-13,4); ctx.lineTo(13,4); ctx.lineTo(24,44); ctx.lineTo(-24,44); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#d9c98a';
+  ctx.beginPath(); ctx.ellipse(0,0,13,5,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#a89552'; ctx.lineWidth = 0.7; ctx.stroke();
+  ctx.fillStyle = '#fff6d9';
+  ctx.beginPath(); ctx.ellipse(0,1,8,2.6,0,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(30,-9);
+  ctx.fillStyle = '#7f98a3';
+  ctx.fillRect(-1.5,0,3,9);
+  ctx.fillStyle = '#2b2f36';
+  ctx.fillRect(-11,-22,22,17);
+  ctx.strokeStyle = '#111417'; ctx.lineWidth = 1; ctx.strokeRect(-11,-22,22,17);
+  const scr = ctx.createLinearGradient(-9,-20,9,-7);
+  scr.addColorStop(0,'#7fe8ff');
+  scr.addColorStop(1,'#2a7fb8');
+  ctx.fillStyle = scr;
+  ctx.fillRect(-9,-20,18,13);
+  ctx.strokeStyle = 'rgba(127,232,255,0.5)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-9,-20); ctx.lineTo(9,-7); ctx.stroke();
+  ctx.restore();
 
   ctx.globalAlpha = 1;
   ctx.restore();
@@ -677,9 +741,15 @@ function drawDenture(sx,y,o){
   ctx.save();
   ctx.translate(sx+o.w/2, y+o.h/2);
   ctx.rotate(Math.sin(Date.now()/260+o.bob)*0.3);
+  const variant = o.dentureVariant || 0;
+  const flip = variant===1 ? -1 : 1;
+  const scale = variant===2 ? 1.25 : 1;
+  const teethCount = variant===2 ? 5 : 3;
+  ctx.scale(scale, scale*flip);
+
   ctx.shadowColor = '#ff6f91';
   ctx.shadowBlur = 5;
-  ctx.fillStyle = '#ff8fa8';
+  ctx.fillStyle = variant===1 ? '#ff7a9a' : '#ff8fa8';
   ctx.beginPath();
   ctx.moveTo(-9,-1);
   ctx.quadraticCurveTo(-9,7,0,8.5);
@@ -691,8 +761,8 @@ function drawDenture(sx,y,o){
   ctx.strokeStyle='#e0567a'; ctx.lineWidth=0.7; ctx.stroke();
 
   ctx.fillStyle = '#ffffff';
-  for(let i=-3;i<=3;i++){
-    const tx = i*2.3;
+  for(let i=-teethCount;i<=teethCount;i++){
+    const tx = i*(6/teethCount);
     const ty = -1 + Math.abs(i)*0.35;
     ctx.beginPath();
     ctx.moveTo(tx-0.9, ty);
@@ -703,11 +773,17 @@ function drawDenture(sx,y,o){
     ctx.fill();
   }
   ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 0.4;
-  for(let i=-3;i<=3;i++){
-    ctx.beginPath(); ctx.moveTo(i*2.3-1.1,-0.8); ctx.lineTo(i*2.3-1.1,3.4); ctx.stroke();
+  for(let i=-teethCount;i<=teethCount;i++){
+    const tx = i*(6/teethCount);
+    ctx.beginPath(); ctx.moveTo(tx-1.1,-0.8); ctx.lineTo(tx-1.1,3.4); ctx.stroke();
   }
   ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 0.9;
   ctx.beginPath(); ctx.moveTo(-7,-3); ctx.quadraticCurveTo(0,-6,7,-3); ctx.stroke();
+  if(variant===1){
+    ctx.strokeStyle = '#c9c9c9'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(-9,-2); ctx.lineTo(-11,-4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9,-2); ctx.lineTo(11,-4); ctx.stroke();
+  }
   ctx.restore();
 }
 function drawPlayer(){
@@ -847,15 +923,24 @@ function drawBoss(sx){
   ctx.fillRect(-BOSS_W_BODY/2-11, 45, 9, 48);
   ctx.fillRect(BOSS_W_BODY/2+2, 45, 9, 48);
 
-  const neckW = 15, neckH = 19;
+  const neckW = 17, neckH = 20;
   const neckTop = 41 - neckH + 5;
-  ctx.fillStyle = '#957362';
+  ctx.fillStyle = '#8a6553';
   ctx.fillRect(-neckW/2, neckTop, neckW, neckH);
 
-  const headW = 73;
+  const headW = 76;
+  const headBottomY = neckTop + 9;
+
+  ctx.fillStyle = '#a17a5f';
+  ctx.beginPath();
+  ctx.moveTo(-headW*0.34, headBottomY-16);
+  ctx.quadraticCurveTo(-headW*0.30, headBottomY+3, 0, headBottomY+6);
+  ctx.quadraticCurveTo(headW*0.30, headBottomY+3, headW*0.34, headBottomY-16);
+  ctx.closePath();
+  ctx.fill();
+
   if(bossFaceImg.complete && bossFaceImg.naturalWidth){
     const headH = headW * (bossFaceImg.naturalHeight / bossFaceImg.naturalWidth);
-    const headBottomY = neckTop + 9;
     const headTopY = headBottomY - headH;
     ctx.drawImage(bossFaceImg, -headW/2, headTopY, headW, headH);
   } else {
@@ -891,7 +976,7 @@ function render(){
   ctx.beginPath(); ctx.moveTo(0,GROUND_Y); ctx.lineTo(GW,GROUND_Y); ctx.stroke();
 
   const parallaxFactor = 0.45;
-  const chairSpacing = 210;
+  const chairSpacing = 280;
   const chairOffset = (camX*parallaxFactor) % chairSpacing;
   for(let i=-1; i<=Math.ceil(GW/chairSpacing)+1; i++){
     const sx = i*chairSpacing - chairOffset + 30;
@@ -984,13 +1069,30 @@ function render(){
     ctx.fillStyle = '#1a0f00';
     ctx.strokeStyle = '#ffe27a';
     ctx.lineWidth = 2;
-    ctx.fillRect(-34, -12, 68, 22);
-    ctx.strokeRect(-34, -12, 68, 22);
+    ctx.fillRect(-40, -12, 80, 22);
+    ctx.strokeRect(-40, -12, 80, 22);
     ctx.shadowBlur = 0;
+
+    ctx.save();
+    ctx.translate(-30, 0);
+    ctx.fillStyle = '#b8722a';
+    ctx.fillRect(-3.5, -7, 7, 11);
+    ctx.fillStyle = '#3a1f0a';
+    ctx.fillRect(-1.6, -11, 3.2, 5);
+    ctx.fillStyle = '#f0c060';
+    ctx.fillRect(-1.2, -10.3, 2.4, 1.4);
+    ctx.fillStyle = 'rgba(255,220,150,0.85)';
+    ctx.fillRect(-2.6, -3, 5.2, 5.5);
+    ctx.strokeStyle = '#7a4a1a'; ctx.lineWidth = 0.6;
+    ctx.strokeRect(-3.5, -7, 7, 11);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 3px monospace'; ctx.textAlign='center';
+    ctx.fillText('W', 0, 1);
+    ctx.restore();
+
     ctx.textAlign = 'center';
-    ctx.font = 'bold 13px monospace';
+    ctx.font = 'bold 12px monospace';
     ctx.fillStyle = '#ffe27a';
-    ctx.fillText('ВІСКІ', 0, 5);
+    ctx.fillText('ВІСКІ', 10, 5);
     ctx.restore();
     ctx.save();
     ctx.textAlign = 'center';
